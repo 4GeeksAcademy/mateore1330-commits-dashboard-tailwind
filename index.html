@@ -1,0 +1,520 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Dashboard Estrategico - Lola Lolita</title>
+
+  <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+
+  <style type="text/css">
+    :root {
+      --brand: #ff4785;
+      --brand-soft: #ffd0e1;
+      --brand-deep: #d83069;
+      --ink: #101828;
+      --muted: #667085;
+      --panel: #ffffff;
+      --page: #f7f8fa;
+      --font-ui: "Manrope", "Satoshi", "Avenir Next", "Segoe UI", sans-serif;
+    }
+
+    .bg-page { background-color: var(--page); }
+    .text-ink { color: var(--ink); }
+    .text-brand { color: var(--brand); }
+    .bg-brand { background-color: var(--brand); }
+    .font-ui { font-family: var(--font-ui); }
+    .text-muted { color: var(--muted); }
+
+    .focus-brand:focus {
+      outline: none;
+      box-shadow: 0 0 0 3px rgba(255, 71, 133, 0.35);
+    }
+
+    .glass-panel {
+      background: linear-gradient(180deg, rgba(255, 255, 255, 0.95) 0%, rgba(255, 255, 255, 0.88) 100%);
+      backdrop-filter: blur(8px);
+    }
+
+    .bg-atmosphere {
+      background:
+        radial-gradient(circle at 15% 15%, rgba(255, 71, 133, 0.18) 0%, rgba(255, 71, 133, 0) 38%),
+        radial-gradient(circle at 85% 8%, rgba(16, 24, 40, 0.1) 0%, rgba(16, 24, 40, 0) 32%),
+        linear-gradient(180deg, #fbfcfd 0%, #f5f6f8 100%);
+    }
+
+    .fade-in {
+      animation: fadeIn 500ms ease-out both;
+    }
+
+    .rise-in {
+      animation: riseIn 600ms ease-out both;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
+
+    @keyframes riseIn {
+      from {
+        opacity: 0;
+        transform: translateY(12px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+  </style>
+</head>
+<body class="bg-page text-ink font-ui min-h-screen bg-atmosphere">
+  <main class="max-w-7xl mx-auto px-4 py-8 md:px-8 md:py-10 fade-in">
+    <header class="rise-in mb-8">
+      <div class="flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
+        <div>
+          <p class="text-sm tracking-[0.18em] uppercase text-muted">Social Commerce Intelligence</p>
+          <h1 class="text-3xl md:text-4xl font-black mt-1">Dashboard Estrategico - Lola Lolita</h1>
+          <p class="text-muted mt-2 max-w-2xl">Monitorea comisiones, ranking de productos, conversion de anuncios, ROI por plataforma y engagement cruzado desde un unico panel.</p>
+        </div>
+        <div class="glass-panel rounded-2xl border border-slate-200 shadow-sm p-4 min-w-[280px]">
+          <p class="text-xs text-muted uppercase tracking-[0.14em]">Resumen rapido</p>
+          <p id="quick-summary" class="text-sm mt-2 text-slate-700">Cargando metricas...</p>
+        </div>
+      </div>
+    </header>
+
+    <section class="rise-in mb-6 grid grid-cols-1 md:grid-cols-3 gap-4" style="animation-delay: 100ms;">
+      <div class="glass-panel border border-slate-200 rounded-2xl p-4 md:col-span-2">
+        <p class="text-xs text-muted uppercase tracking-[0.14em] mb-3">Filtros</p>
+        <div class="flex flex-wrap items-center gap-3">
+          <div class="inline-flex rounded-xl border border-slate-200 overflow-hidden" id="date-range-group">
+            <button data-range="today" class="date-btn px-4 py-2 text-sm font-semibold bg-white text-slate-600 hover:bg-slate-50">Hoy</button>
+            <button data-range="7d" class="date-btn px-4 py-2 text-sm font-semibold bg-white text-slate-600 hover:bg-slate-50">7 dias</button>
+            <button data-range="30d" class="date-btn px-4 py-2 text-sm font-semibold bg-white text-slate-600 hover:bg-slate-50">30 dias</button>
+          </div>
+          <label class="text-sm text-muted" for="platform-filter">Plataforma</label>
+          <select id="platform-filter" class="px-3 py-2 rounded-xl border border-slate-200 bg-white text-sm min-w-[180px] focus-brand">
+            <option value="all">Todas las plataformas</option>
+            <option value="Instagram">Instagram</option>
+            <option value="TikTok">TikTok</option>
+            <option value="Facebook">Facebook</option>
+            <option value="YouTube">YouTube</option>
+          </select>
+        </div>
+      </div>
+      <div class="glass-panel border border-slate-200 rounded-2xl p-4">
+        <p class="text-xs text-muted uppercase tracking-[0.14em]">Comision fija</p>
+        <p class="text-2xl font-extrabold mt-2 text-brand">15%</p>
+        <p class="text-sm text-muted mt-1">Aplicada sobre ingresos brutos por venta afiliada.</p>
+      </div>
+    </section>
+
+    <section class="grid grid-cols-1 xl:grid-cols-12 gap-5">
+      <article class="glass-panel border border-slate-200 rounded-2xl p-5 xl:col-span-4 rise-in" style="animation-delay: 160ms;">
+        <p class="text-xs text-muted uppercase tracking-[0.14em]">1) Analisis de Comisiones</p>
+        <h2 class="text-lg font-bold mt-1">Total Earnings</h2>
+        <p id="total-earnings" class="text-4xl font-black mt-4 text-brand">EUR0.00</p>
+        <p id="earnings-detail" class="text-sm text-muted mt-2">Comisiones netas acumuladas en el periodo.</p>
+        <div class="mt-6 h-56">
+          <canvas id="commissionLineChart"></canvas>
+        </div>
+      </article>
+
+      <article class="glass-panel border border-slate-200 rounded-2xl p-5 xl:col-span-4 rise-in" style="animation-delay: 220ms;">
+        <p class="text-xs text-muted uppercase tracking-[0.14em]">2) Ranking de Productos</p>
+        <h2 class="text-lg font-bold mt-1">Ingresos Brutos por Producto</h2>
+        <div class="mt-4 h-72">
+          <canvas id="productRankingChart"></canvas>
+        </div>
+      </article>
+
+      <article class="glass-panel border border-slate-200 rounded-2xl p-5 xl:col-span-4 rise-in" style="animation-delay: 280ms;">
+        <p class="text-xs text-muted uppercase tracking-[0.14em]">3) Eficiencia de Anuncios</p>
+        <h2 class="text-lg font-bold mt-1">Embudo de Conversion</h2>
+        <p id="conversion-rate" class="text-sm text-muted mt-2">Conversion Rate: 0%</p>
+        <div class="mt-5 space-y-3" id="funnel-container"></div>
+      </article>
+
+      <article class="glass-panel border border-slate-200 rounded-2xl p-5 xl:col-span-6 rise-in" style="animation-delay: 340ms;">
+        <p class="text-xs text-muted uppercase tracking-[0.14em]">4) Rentabilidad por Canal</p>
+        <h2 class="text-lg font-bold mt-1">ROI (Ingresos / Coste de Contenido)</h2>
+        <div class="overflow-x-auto mt-4">
+          <table class="w-full text-sm">
+            <thead>
+              <tr class="text-left text-muted border-b border-slate-200">
+                <th class="py-2 pr-4">Plataforma</th>
+                <th class="py-2 pr-4">Ingresos</th>
+                <th class="py-2 pr-4">Coste</th>
+                <th class="py-2 pr-4">ROI</th>
+              </tr>
+            </thead>
+            <tbody id="roi-table-body"></tbody>
+          </table>
+        </div>
+      </article>
+
+      <article class="glass-panel border border-slate-200 rounded-2xl p-5 xl:col-span-6 rise-in" style="animation-delay: 400ms;">
+        <p class="text-xs text-muted uppercase tracking-[0.14em]">5) Engagement Rate Cruzado</p>
+        <h2 class="text-lg font-bold mt-1">Heatmap Plataforma x Producto</h2>
+        <div class="overflow-x-auto mt-4">
+          <table class="w-full text-sm border-separate border-spacing-1">
+            <thead>
+              <tr id="heatmap-header"></tr>
+            </thead>
+            <tbody id="heatmap-body"></tbody>
+          </table>
+        </div>
+      </article>
+    </section>
+  </main>
+
+  <script>
+    const COMMISSION_RATE = 0.15;
+    const PRODUCTS = {
+      "Rizador de pelo": 50,
+      "Plancha de pelo": 120,
+      "Blanqueador dental": 80,
+    };
+
+    const PLATFORMS = ["Instagram", "TikTok", "Facebook", "YouTube"];
+    const PRODUCT_LIST = Object.keys(PRODUCTS);
+
+    const STATE = {
+      dateRange: "30d",
+      platform: "all",
+    };
+
+    const formatEUR = (value) => new Intl.NumberFormat("es-ES", {
+      style: "currency",
+      currency: "EUR",
+      maximumFractionDigits: 2,
+    }).format(value);
+
+    const data = buildSyntheticData(180);
+
+    function buildSyntheticData(days) {
+      const now = new Date();
+      const rows = [];
+      for (let d = days - 1; d >= 0; d -= 1) {
+        const date = new Date(now);
+        date.setDate(now.getDate() - d);
+
+        PLATFORMS.forEach((platform, pi) => {
+          PRODUCT_LIST.forEach((product, pj) => {
+            const wave = Math.sin((d + 1 + pi * 3 + pj * 5) / 6) + 1.25;
+            const baseReach = 260 + pi * 70 + pj * 35;
+            const reach = Math.round(baseReach * wave + (days - d) * 2);
+            const ctrBase = 0.07 + pi * 0.008 + pj * 0.005;
+            const clicks = Math.round(reach * ctrBase);
+            const cvrBase = 0.11 + pi * 0.01 + pj * 0.006;
+            const conversions = Math.max(1, Math.round(clicks * cvrBase));
+            const interactions = Math.round(reach * (0.12 + pi * 0.016 + pj * 0.011));
+            const cost = Math.round(65 + pi * 18 + pj * 10 + wave * 11);
+            const revenue = conversions * PRODUCTS[product];
+
+            rows.push({
+              date: date.toISOString().split("T")[0],
+              platform,
+              product,
+              reach,
+              clicks,
+              conversions,
+              interactions,
+              cost,
+              revenue,
+            });
+          });
+        });
+      }
+      return rows;
+    }
+
+    function isInRange(rowDate) {
+      const today = new Date();
+      const date = new Date(rowDate);
+      if (STATE.dateRange === "today") {
+        return date.toDateString() === today.toDateString();
+      }
+      const limitDays = STATE.dateRange === "7d" ? 7 : 30;
+      const from = new Date(today);
+      from.setDate(today.getDate() - (limitDays - 1));
+      return date >= from && date <= today;
+    }
+
+    function getFilteredData() {
+      return data.filter((row) => {
+        const platformPass = STATE.platform === "all" || row.platform === STATE.platform;
+        return platformPass && isInRange(row.date);
+      });
+    }
+
+    function aggregateByDate(filtered) {
+      const map = new Map();
+      filtered.forEach((row) => {
+        const key = row.date.slice(0, 7);
+        const entry = map.get(key) || { gross: 0 };
+        entry.gross += row.revenue;
+        map.set(key, entry);
+      });
+      const sortedKeys = [...map.keys()].sort();
+      let running = 0;
+      const values = sortedKeys.map((k) => {
+        running += map.get(k).gross * COMMISSION_RATE;
+        return Number(running.toFixed(2));
+      });
+      return { labels: sortedKeys, values };
+    }
+
+    function aggregateProductRevenue(filtered) {
+      const totals = PRODUCT_LIST.map((product) => {
+        const revenue = filtered
+          .filter((row) => row.product === product)
+          .reduce((sum, row) => sum + row.revenue, 0);
+        return Number(revenue.toFixed(2));
+      });
+      return totals;
+    }
+
+    function aggregateFunnel(filtered) {
+      const reach = filtered.reduce((sum, row) => sum + row.reach, 0);
+      const clicks = filtered.reduce((sum, row) => sum + row.clicks, 0);
+      const sales = filtered.reduce((sum, row) => sum + row.conversions, 0);
+      const conversionRate = reach ? (sales / reach) * 100 : 0;
+      return { reach, clicks, sales, conversionRate };
+    }
+
+    function aggregateROI(filtered) {
+      return PLATFORMS
+        .map((platform) => {
+          const rows = filtered.filter((row) => row.platform === platform);
+          const revenue = rows.reduce((sum, row) => sum + row.revenue, 0);
+          const cost = rows.reduce((sum, row) => sum + row.cost, 0);
+          const roi = cost ? revenue / cost : 0;
+          return { platform, revenue, cost, roi };
+        })
+        .filter((row) => STATE.platform === "all" || row.platform === STATE.platform);
+    }
+
+    function aggregateHeatmap(filtered) {
+      const matrix = PRODUCT_LIST.map((product) => {
+        const row = { product };
+        PLATFORMS.forEach((platform) => {
+          const subset = filtered.filter((item) => item.product === product && item.platform === platform);
+          const interactions = subset.reduce((sum, item) => sum + item.interactions, 0);
+          const reach = subset.reduce((sum, item) => sum + item.reach, 0);
+          row[platform] = reach ? (interactions / reach) * 100 : 0;
+        });
+        return row;
+      });
+      return matrix;
+    }
+
+    let commissionLineChart;
+    let productRankingChart;
+
+    function buildCharts() {
+      const lineCtx = document.getElementById("commissionLineChart");
+      const barCtx = document.getElementById("productRankingChart");
+
+      commissionLineChart = new Chart(lineCtx, {
+        type: "line",
+        data: {
+          labels: [],
+          datasets: [{
+            label: "Comisiones acumuladas",
+            data: [],
+            borderColor: "#ff4785",
+            backgroundColor: "rgba(255, 71, 133, 0.12)",
+            fill: true,
+            pointRadius: 3,
+            tension: 0.35,
+          }],
+        },
+        options: {
+          maintainAspectRatio: false,
+          plugins: {
+            legend: { display: false },
+          },
+          scales: {
+            x: {
+              ticks: { color: "#667085" },
+              grid: { display: false },
+            },
+            y: {
+              ticks: {
+                color: "#667085",
+                callback(value) { return `EUR${value}`; },
+              },
+              grid: { color: "rgba(16,24,40,0.08)" },
+            },
+          },
+        },
+      });
+
+      productRankingChart = new Chart(barCtx, {
+        type: "bar",
+        data: {
+          labels: PRODUCT_LIST,
+          datasets: [{
+            data: [0, 0, 0],
+            borderRadius: 10,
+            backgroundColor: ["#ff4785", "#ff7aa8", "#ffc0d9"],
+          }],
+        },
+        options: {
+          indexAxis: "y",
+          maintainAspectRatio: false,
+          plugins: {
+            legend: { display: false },
+          },
+          scales: {
+            y: {
+              ticks: { color: "#344054", font: { weight: "600" } },
+              grid: { display: false },
+            },
+            x: {
+              ticks: {
+                color: "#667085",
+                callback(value) { return `EUR${value}`; },
+              },
+              grid: { color: "rgba(16,24,40,0.08)" },
+            },
+          },
+        },
+      });
+    }
+
+    function renderFunnel({ reach, clicks, sales, conversionRate }) {
+      const funnelData = [
+        { label: "Alcance", value: reach, width: 100, color: "bg-brand" },
+        { label: "Clics", value: clicks, width: reach ? Math.max((clicks / reach) * 100, 8) : 8, color: "bg-pink-300" },
+        { label: "Ventas Finales", value: sales, width: reach ? Math.max((sales / reach) * 100, 6) : 6, color: "bg-pink-200" },
+      ];
+
+      const container = document.getElementById("funnel-container");
+      container.innerHTML = funnelData.map((step) => `
+        <div>
+          <div class="flex items-center justify-between text-sm mb-1">
+            <span class="text-slate-700 font-semibold">${step.label}</span>
+            <span class="text-muted">${step.value.toLocaleString("es-ES")}</span>
+          </div>
+          <div class="h-8 bg-slate-100 rounded-lg overflow-hidden">
+            <div class="h-full ${step.color} transition-all duration-500" style="width: ${step.width}%;"></div>
+          </div>
+        </div>
+      `).join("");
+
+      document.getElementById("conversion-rate").textContent = `Conversion Rate: ${conversionRate.toFixed(2)}%`;
+    }
+
+    function renderROITable(roiData) {
+      const body = document.getElementById("roi-table-body");
+      body.innerHTML = roiData
+        .sort((a, b) => b.roi - a.roi)
+        .map((row) => {
+          const roiColor = row.roi >= 4 ? "text-emerald-600" : row.roi >= 2 ? "text-amber-600" : "text-rose-600";
+          return `
+            <tr class="border-b border-slate-100">
+              <td class="py-2 pr-4 font-semibold text-slate-700">${row.platform}</td>
+              <td class="py-2 pr-4">${formatEUR(row.revenue)}</td>
+              <td class="py-2 pr-4">${formatEUR(row.cost)}</td>
+              <td class="py-2 pr-4 font-bold ${roiColor}">${row.roi.toFixed(2)}x</td>
+            </tr>
+          `;
+        }).join("");
+    }
+
+    function getHeatColor(value, maxValue) {
+      const ratio = maxValue ? value / maxValue : 0;
+      const alpha = 0.12 + ratio * 0.75;
+      return `rgba(255, 71, 133, ${alpha.toFixed(2)})`;
+    }
+
+    function renderHeatmap(matrix) {
+      const header = document.getElementById("heatmap-header");
+      const body = document.getElementById("heatmap-body");
+      const columns = STATE.platform === "all" ? PLATFORMS : [STATE.platform];
+
+      header.innerHTML = `<th class="text-left py-2 px-2 text-muted">Producto</th>${columns
+        .map((platform) => `<th class="text-left py-2 px-2 text-muted">${platform}</th>`)
+        .join("")}`;
+
+      const allValues = matrix.flatMap((row) => columns.map((col) => row[col]));
+      const maxValue = Math.max(...allValues, 0);
+
+      body.innerHTML = matrix.map((row) => {
+        const cells = columns.map((platform) => {
+          const value = row[platform];
+          const bg = getHeatColor(value, maxValue);
+          return `<td class="py-2 px-2 rounded-md font-semibold" style="background:${bg}">${value.toFixed(2)}%</td>`;
+        }).join("");
+        return `<tr><td class="py-2 px-2 font-semibold text-slate-700">${row.product}</td>${cells}</tr>`;
+      }).join("");
+    }
+
+    function updateDashboard() {
+      const filtered = getFilteredData();
+
+      const totalGrossRevenue = filtered.reduce((sum, row) => sum + row.revenue, 0);
+      const totalEarnings = totalGrossRevenue * COMMISSION_RATE;
+      const totalConversions = filtered.reduce((sum, row) => sum + row.conversions, 0);
+
+      document.getElementById("total-earnings").textContent = formatEUR(totalEarnings);
+      document.getElementById("earnings-detail").textContent = `${totalConversions.toLocaleString("es-ES")} ventas atribuidas en el periodo seleccionado.`;
+      document.getElementById("quick-summary").textContent = `Ingresos brutos: ${formatEUR(totalGrossRevenue)} | Comision neta: ${formatEUR(totalEarnings)}.`;
+
+      const trend = aggregateByDate(filtered);
+      commissionLineChart.data.labels = trend.labels;
+      commissionLineChart.data.datasets[0].data = trend.values;
+      commissionLineChart.update();
+
+      const productRevenue = aggregateProductRevenue(filtered);
+      productRankingChart.data.datasets[0].data = productRevenue;
+      productRankingChart.update();
+
+      const funnel = aggregateFunnel(filtered);
+      renderFunnel(funnel);
+
+      const roiData = aggregateROI(filtered);
+      renderROITable(roiData);
+
+      const heatmapData = aggregateHeatmap(filtered);
+      renderHeatmap(heatmapData);
+
+      updateFilterStyles();
+    }
+
+    function updateFilterStyles() {
+      document.querySelectorAll(".date-btn").forEach((btn) => {
+        if (btn.dataset.range === STATE.dateRange) {
+          btn.classList.remove("bg-white", "text-slate-600");
+          btn.classList.add("bg-brand", "text-white");
+        } else {
+          btn.classList.add("bg-white", "text-slate-600");
+          btn.classList.remove("bg-brand", "text-white");
+        }
+      });
+    }
+
+    function bindEvents() {
+      document.querySelectorAll(".date-btn").forEach((btn) => {
+        btn.addEventListener("click", () => {
+          STATE.dateRange = btn.dataset.range;
+          updateDashboard();
+        });
+      });
+
+      document.getElementById("platform-filter").addEventListener("change", (event) => {
+        STATE.platform = event.target.value;
+        updateDashboard();
+      });
+    }
+
+    buildCharts();
+    bindEvents();
+    updateDashboard();
+  </script>
+</body>
+</html>
